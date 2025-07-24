@@ -2,7 +2,7 @@
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
 [![maintainer](https://img.shields.io/badge/maintainer-%40RoyalPineapple-blue.svg)](https://github.com/RoyalPineapple)
-[![license](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![license](https://img.shields.io/badge/license-Seems%20to%20Work-orange.svg)](LICENSE)
 
 A comprehensive Home Assistant integration for controlling Dyson fans through the BlowControl system. This integration provides full fan control, environmental monitoring, and status tracking for your BlowControl-enabled Dyson devices.
 
@@ -720,13 +720,13 @@ This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the "Seems to Work" License (MIT-compatible) - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
 - **Home Assistant Community**: For the excellent integration framework
 - **Dyson**: For creating amazing fan technology
-- **BlowControl Community**: For the hardware and software development
+- **Alex Odawa**: For the original BlowControl project and the "Seems to Work" License
 - **Contributors**: Everyone who has contributed to this project
 
 ## 📞 Support
