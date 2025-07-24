@@ -50,7 +50,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
             )
             self._cli_available = result is not None
             if not self._cli_available:
-                _LOGGER.warning("BlowControl CLI not found in PATH. Install it to enable full functionality.")
+                _LOGGER.info("BlowControl CLI not found in PATH. Using mock data for testing. Install BlowControl CLI for full device control.")
             return self._cli_available
         except Exception as e:
             _LOGGER.error("Error checking for BlowControl CLI: %s", e)
@@ -185,7 +185,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
     async def async_set_fan_power(self, power: bool) -> None:
         """Set fan power state via BlowControl CLI."""
         if not await self._check_cli_available():
-            _LOGGER.warning("Cannot set fan power: BlowControl CLI not available")
+            _LOGGER.info("Fan power control: Using mock mode (BlowControl CLI not installed)")
             return
             
         try:
@@ -217,7 +217,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
     async def async_set_fan_speed(self, speed: int) -> None:
         """Set fan speed via BlowControl CLI."""
         if not await self._check_cli_available():
-            _LOGGER.warning("Cannot set fan speed: BlowControl CLI not available")
+            _LOGGER.info("Fan speed control: Using mock mode (BlowControl CLI not installed)")
             return
             
         try:
@@ -251,7 +251,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
     async def async_set_fan_oscillation(self, oscillating: bool) -> None:
         """Set fan oscillation via BlowControl CLI."""
         if not await self._check_cli_available():
-            _LOGGER.warning("Cannot set fan oscillation: BlowControl CLI not available")
+            _LOGGER.info("Fan oscillation control: Using mock mode (BlowControl CLI not installed)")
             return
             
         try:
@@ -285,7 +285,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
     async def async_set_fan_direction(self, direction: str) -> None:
         """Set fan direction via BlowControl CLI."""
         if not await self._check_cli_available():
-            _LOGGER.warning("Cannot set fan direction: BlowControl CLI not available")
+            _LOGGER.info("Fan direction control: Using mock mode (BlowControl CLI not installed)")
             return
             
         try:
