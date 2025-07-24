@@ -24,18 +24,7 @@ _LOGGER = logging.getLogger(__name__)
 # Platform to be used for this integration
 PLATFORMS: list[Platform] = [Platform.FAN, Platform.BINARY_SENSOR, Platform.SENSOR]
 
-# Configuration schema for the integration
-CONFIG_SCHEMA = vol.Schema(
-    {
-        DOMAIN: vol.Schema(
-            {
-                vol.Required(CONF_HOST): cv.string,
-                vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-                vol.Optional(CONF_DEVICE_ID): cv.string,
-            }
-        )
-    }
-)
+# Removed CONFIG_SCHEMA and async_setup
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up BlowControl from a config entry."""
@@ -62,9 +51,3 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id)
     
     return unload_ok
-
-async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
-    """Set up the BlowControl component."""
-    hass.data.setdefault(DOMAIN, {})
-    
-    return True
