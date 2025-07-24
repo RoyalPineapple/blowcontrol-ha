@@ -114,6 +114,8 @@ class BlowControlFan(FanEntity):
             FanEntityFeature.SET_SPEED
             | FanEntityFeature.OSCILLATE
             | FanEntityFeature.DIRECTION
+            | FanEntityFeature.TURN_ON
+            | FanEntityFeature.TURN_OFF
         )
 
     async def async_turn_on(
