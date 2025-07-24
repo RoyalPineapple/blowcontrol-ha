@@ -1,0 +1,7 @@
+{
+  "name": "BlowControl Dyson Fan",
+  "render_readme": true,
+  "domains": ["fan", "binary_sensor", "sensor"],
+  "homeassistant": "2023.8.0",
+  "iot_class": "Local Polling"
+}
