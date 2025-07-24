@@ -1,0 +1,51 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "BlowControl Configuration",
+        "description": "Enter the details for your BlowControl device",
+        "data": {
+          "host": "Host/IP Address",
+          "name": "Device Name"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to BlowControl device",
+      "invalid_host": "Invalid host address",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  },
+  "entity": {
+    "fan": {
+      "blowcontrol_fan": {
+        "name": "BlowControl Fan"
+      }
+    },
+    "binary_sensor": {
+      "blowcontrol_power": {
+        "name": "BlowControl Power"
+      },
+      "blowcontrol_connected": {
+        "name": "BlowControl Connected"
+      }
+    },
+    "sensor": {
+      "blowcontrol_temperature": {
+        "name": "BlowControl Temperature"
+      },
+      "blowcontrol_humidity": {
+        "name": "BlowControl Humidity"
+      },
+      "blowcontrol_air_quality": {
+        "name": "BlowControl Air Quality"
+      },
+      "blowcontrol_fan_speed": {
+        "name": "BlowControl Fan Speed"
+      }
+    }
+  }
+}
