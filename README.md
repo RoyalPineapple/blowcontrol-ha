@@ -90,13 +90,23 @@ A comprehensive Home Assistant integration for controlling Dyson fans through th
 
 ### Method 2: Manual Installation
 
-1. **Install BlowControl CLI** (required):
-   ```bash
-   # Install the blowcontrol CLI tool
-   # This is required for the integration to work
-   # Follow the official BlowControl installation guide
-   # https://github.com/yourusername/blowcontrol
-   ```
+#### Option A: Using the Installation Helper (Recommended)
+```bash
+# Download and run the installation helper
+curl -O https://raw.githubusercontent.com/RoyalPineapple/blowcontrol-ha/main/scripts/install_blowcontrol.py
+python3 install_blowcontrol.py
+```
+
+#### Option B: Manual Installation
+```bash
+# Install Python dependencies
+pip install paho-mqtt python-dotenv
+
+# Clone and install BlowControl
+git clone https://github.com/RoyalPineapple/blowcontrol.git
+cd blowcontrol
+pip install -e .
+```
 
 2. **Clone Repository**:
    ```bash
