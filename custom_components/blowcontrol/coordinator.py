@@ -5,6 +5,7 @@ import asyncio
 import json
 import logging
 import subprocess
+import shutil
 from datetime import timedelta
 from typing import Any
 from functools import partial
@@ -28,6 +29,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
         self.serial_number = device_config.get("serial_number", "")
         self.mqtt_port = device_config.get("mqtt_port", 1883)
         self.root_topic = device_config.get("root_topic", "438M")
+        self._cli_available = None
         
         super().__init__(
             hass,
@@ -36,9 +38,34 @@ class BlowControlCoordinator(DataUpdateCoordinator):
             update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL),
         )
 
+    async def _check_cli_available(self) -> bool:
+        """Check if blowcontrol CLI is available."""
+        if self._cli_available is not None:
+            return self._cli_available
+            
+        try:
+            # Check if blowcontrol command exists
+            result = await self.hass.async_add_executor_job(
+                partial(shutil.which, "blowcontrol")
+            )
+            self._cli_available = result is not None
+            if not self._cli_available:
+                _LOGGER.warning("BlowControl CLI not found in PATH. Install it to enable full functionality.")
+            return self._cli_available
+        except Exception as e:
+            _LOGGER.error("Error checking for BlowControl CLI: %s", e)
+            self._cli_available = False
+            return False
+
     async def _async_update_data(self) -> dict[str, Any]:
         """Update data via BlowControl CLI."""
         _LOGGER.info("=== COORDINATOR: Updating data via BlowControl CLI ===")
+        
+        # Check if CLI is available
+        if not await self._check_cli_available():
+            _LOGGER.info("Using mock data (CLI not available)")
+            return await self._fetch_mock_data()
+            
         try:
             # Set environment variables for BlowControl CLI
             env = {
@@ -130,6 +157,10 @@ class BlowControlCoordinator(DataUpdateCoordinator):
 
     async def async_set_fan_power(self, power: bool) -> None:
         """Set fan power state via BlowControl CLI."""
+        if not await self._check_cli_available():
+            _LOGGER.warning("Cannot set fan power: BlowControl CLI not available")
+            return
+            
         try:
             env = {
                 "DEVICE_IP": self.device_ip,
@@ -154,6 +185,10 @@ class BlowControlCoordinator(DataUpdateCoordinator):
 
     async def async_set_fan_speed(self, speed: int) -> None:
         """Set fan speed via BlowControl CLI."""
+        if not await self._check_cli_available():
+            _LOGGER.warning("Cannot set fan speed: BlowControl CLI not available")
+            return
+            
         try:
             env = {
                 "DEVICE_IP": self.device_ip,
@@ -178,6 +213,10 @@ class BlowControlCoordinator(DataUpdateCoordinator):
 
     async def async_set_fan_oscillation(self, oscillating: bool) -> None:
         """Set fan oscillation via BlowControl CLI."""
+        if not await self._check_cli_available():
+            _LOGGER.warning("Cannot set fan oscillation: BlowControl CLI not available")
+            return
+            
         try:
             env = {
                 "DEVICE_IP": self.device_ip,
@@ -203,6 +242,10 @@ class BlowControlCoordinator(DataUpdateCoordinator):
 
     async def async_set_fan_direction(self, direction: str) -> None:
         """Set fan direction via BlowControl CLI."""
+        if not await self._check_cli_available():
+            _LOGGER.warning("Cannot set fan direction: BlowControl CLI not available")
+            return
+            
         try:
             env = {
                 "DEVICE_IP": self.device_ip,
