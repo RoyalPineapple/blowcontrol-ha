@@ -13,8 +13,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import (
-    CONF_HOST,
-    CONF_NAME,
     DEFAULT_NAME,
     DOMAIN,
     STATE_OFF,
@@ -32,19 +30,24 @@ async def async_setup_entry(
     """Set up the BlowControl binary sensor platform."""
     config = hass.data[DOMAIN][config_entry.entry_id]
     
-    host = config[CONF_HOST]
-    name = config.get(CONF_NAME, DEFAULT_NAME)
+    # device_ip = config["device_ip"]  # Use device_ip instead of host
+    name = config.get("name", DEFAULT_NAME)
     
     # Get or create coordinator
     coordinator = hass.data[DOMAIN].get("coordinator")
     if coordinator is None:
-        coordinator = BlowControlCoordinator(hass, host)
+        coordinator = BlowControlCoordinator(hass, config)  # Pass config instead of host
         hass.data[DOMAIN]["coordinator"] = coordinator
     
-    async_add_entities([
-        BlowControlPowerSensor(coordinator, name, config_entry.entry_id),
-        BlowControlConnectionSensor(coordinator, name, config_entry.entry_id),
-    ])
+    # Create entities
+    power_sensor = BlowControlPowerSensor(coordinator, name, config_entry.entry_id)
+    connection_sensor = BlowControlConnectionSensor(coordinator, name, config_entry.entry_id)
+    
+    # Add coordinator listeners
+    coordinator.async_add_listener(power_sensor.update_from_coordinator)
+    coordinator.async_add_listener(connection_sensor.update_from_coordinator)
+    
+    async_add_entities([power_sensor, connection_sensor])
 
 class BlowControlPowerSensor(BinarySensorEntity):
     """Representation of a BlowControl power sensor."""

@@ -17,8 +17,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import (
-    CONF_HOST,
-    CONF_NAME,
     DEFAULT_NAME,
     DOMAIN,
 )
@@ -34,21 +32,28 @@ async def async_setup_entry(
     """Set up the BlowControl sensor platform."""
     config = hass.data[DOMAIN][config_entry.entry_id]
     
-    host = config[CONF_HOST]
-    name = config.get(CONF_NAME, DEFAULT_NAME)
+    # device_ip = config["device_ip"]  # Use device_ip instead of host
+    name = config.get("name", DEFAULT_NAME)
     
     # Get or create coordinator
     coordinator = hass.data[DOMAIN].get("coordinator")
     if coordinator is None:
-        coordinator = BlowControlCoordinator(hass, host)
+        coordinator = BlowControlCoordinator(hass, config)  # Pass config instead of host
         hass.data[DOMAIN]["coordinator"] = coordinator
     
-    async_add_entities([
-        BlowControlTemperatureSensor(coordinator, name, config_entry.entry_id),
-        BlowControlHumiditySensor(coordinator, name, config_entry.entry_id),
-        BlowControlAirQualitySensor(coordinator, name, config_entry.entry_id),
-        BlowControlFanSpeedSensor(coordinator, name, config_entry.entry_id),
-    ])
+    # Create entities
+    temp_sensor = BlowControlTemperatureSensor(coordinator, name, config_entry.entry_id)
+    humidity_sensor = BlowControlHumiditySensor(coordinator, name, config_entry.entry_id)
+    air_quality_sensor = BlowControlAirQualitySensor(coordinator, name, config_entry.entry_id)
+    fan_speed_sensor = BlowControlFanSpeedSensor(coordinator, name, config_entry.entry_id)
+    
+    # Add coordinator listeners
+    coordinator.async_add_listener(temp_sensor.update_from_coordinator)
+    coordinator.async_add_listener(humidity_sensor.update_from_coordinator)
+    coordinator.async_add_listener(air_quality_sensor.update_from_coordinator)
+    coordinator.async_add_listener(fan_speed_sensor.update_from_coordinator)
+    
+    async_add_entities([temp_sensor, humidity_sensor, air_quality_sensor, fan_speed_sensor])
 
 class BlowControlTemperatureSensor(SensorEntity):
     """Representation of a BlowControl temperature sensor."""
