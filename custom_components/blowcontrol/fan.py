@@ -183,6 +183,13 @@ class BlowControlFan(FanEntity):
         self._oscillating = oscillating
         self.async_write_ha_state()
 
+    def oscillate(self, oscillating: bool) -> None:
+        """Set oscillation (synchronous version for Home Assistant)."""
+        # This is called by Home Assistant's async_oscillate method
+        # We'll just update the state immediately and let the async method handle the actual control
+        self._oscillating = oscillating
+        self.async_write_ha_state()
+
     async def async_set_direction(self, direction: str) -> None:
         """Set the direction of the fan."""
         try:
