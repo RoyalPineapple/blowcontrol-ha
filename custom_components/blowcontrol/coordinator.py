@@ -7,6 +7,7 @@ import logging
 import subprocess
 from datetime import timedelta
 from typing import Any
+from functools import partial
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -54,7 +55,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
             _LOGGER.info("Running command: %s", " ".join(command))
             
             result = await self.hass.async_add_executor_job(
-                lambda: subprocess.run(command, capture_output=True, text=True, env=env)
+                partial(subprocess.run, command, capture_output=True, text=True, env=env)
             )
             
             _LOGGER.info("BlowControl CLI return code: %s", result.returncode)
@@ -140,7 +141,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
             
             command = ["blowcontrol", "power", "on" if power else "off"]
             result = await self.hass.async_add_executor_job(
-                lambda: subprocess.run(command, capture_output=True, text=True, env=env)
+                partial(subprocess.run, command, capture_output=True, text=True, env=env)
             )
             
             if result.returncode != 0:
@@ -164,7 +165,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
             
             command = ["blowcontrol", "speed", str(speed)]
             result = await self.hass.async_add_executor_job(
-                lambda: subprocess.run(command, capture_output=True, text=True, env=env)
+                partial(subprocess.run, command, capture_output=True, text=True, env=env)
             )
             
             if result.returncode != 0:
@@ -189,7 +190,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
             # Note: This would need to be adjusted based on actual BlowControl CLI commands
             command = ["blowcontrol", "oscillation", "on" if oscillating else "off"]
             result = await self.hass.async_add_executor_job(
-                lambda: subprocess.run(command, capture_output=True, text=True, env=env)
+                partial(subprocess.run, command, capture_output=True, text=True, env=env)
             )
             
             if result.returncode != 0:
@@ -214,7 +215,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
             # Note: This would need to be adjusted based on actual BlowControl CLI commands
             command = ["blowcontrol", "direction", direction]
             result = await self.hass.async_add_executor_job(
-                lambda: subprocess.run(command, capture_output=True, text=True, env=env)
+                partial(subprocess.run, command, capture_output=True, text=True, env=env)
             )
             
             if result.returncode != 0:
