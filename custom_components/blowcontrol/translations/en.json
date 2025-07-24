@@ -3,9 +3,49 @@
     "step": {
       "user": {
         "title": "BlowControl Configuration",
-        "description": "Enter the details for your BlowControl device",
+        "description": "Choose how to configure your Dyson device",
         "data": {
-          "host": "Host/IP Address",
+          "use_opendyson": "Use OpenDyson (Recommended)"
+        }
+      },
+      "opendyson_setup": {
+        "title": "OpenDyson Setup",
+        "description": "We'll help you install and configure OpenDyson to get your device credentials automatically."
+      },
+      "opendyson_install": {
+        "title": "Install OpenDyson",
+        "description": "OpenDyson needs to be installed to get your device credentials. We'll try to install it automatically, or you can install it manually and try again."
+      },
+      "opendyson_login": {
+        "title": "Dyson Account Login",
+        "description": "Enter your Dyson account credentials to get your device information.",
+        "data": {
+          "email": "Email Address",
+          "password": "Password"
+        }
+      },
+      "device_selection": {
+        "title": "Select Device",
+        "description": "Found {device_count} device(s). Select the one you want to control:",
+        "data": {
+          "device": "Device"
+        }
+      },
+      "manual_credentials": {
+        "title": "Manual Credentials",
+        "description": "Enter your device credentials manually. You can get these from OpenDyson or other Dyson credential extraction tools.",
+        "data": {
+          "device_ip": "Device IP Address",
+          "mqtt_password": "MQTT Password",
+          "serial_number": "Serial Number",
+          "mqtt_port": "MQTT Port",
+          "root_topic": "Root Topic"
+        }
+      },
+      "final_config": {
+        "title": "Final Configuration",
+        "description": "Device: {device_name} ({device_serial})",
+        "data": {
           "name": "Device Name"
         }
       }
@@ -13,6 +53,8 @@
     "error": {
       "cannot_connect": "Failed to connect to BlowControl device",
       "invalid_host": "Invalid host address",
+      "login_failed": "Failed to login to Dyson account",
+      "invalid_credentials": "Invalid credentials provided",
       "unknown": "Unexpected error"
     },
     "abort": {

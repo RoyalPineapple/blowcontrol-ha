@@ -43,13 +43,12 @@ async def async_setup_entry(
     """Set up the BlowControl fan platform."""
     config = hass.data[DOMAIN][config_entry.entry_id]
     
-    host = config[CONF_HOST]
-    name = config.get(CONF_NAME, DEFAULT_NAME)
+    name = config.get("name", DEFAULT_NAME)
     
     # Get or create coordinator
     coordinator = hass.data[DOMAIN].get("coordinator")
     if coordinator is None:
-        coordinator = BlowControlCoordinator(hass, host)
+        coordinator = BlowControlCoordinator(hass, config)
         hass.data[DOMAIN]["coordinator"] = coordinator
     
     # Create fan entity
