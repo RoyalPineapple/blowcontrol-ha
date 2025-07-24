@@ -37,6 +37,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Update data via BlowControl CLI."""
+        _LOGGER.info("=== COORDINATOR: Updating data via BlowControl CLI ===")
         try:
             # Set environment variables for BlowControl CLI
             env = {
@@ -46,27 +47,39 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 "MQTT_PORT": str(self.mqtt_port),
                 "ROOT_TOPIC": self.root_topic,
             }
+            _LOGGER.info("Environment variables: %s", {k: "***" if k == "MQTT_PASSWORD" else v for k, v in env.items()})
             
             # Get device state via BlowControl CLI
+            command = ["blowcontrol", "state", "--json"]
+            _LOGGER.info("Running command: %s", " ".join(command))
+            
             result = await self.hass.async_add_executor_job(
                 subprocess.run,
-                ["blowcontrol", "state", "--json"],
+                command,
                 {"capture_output": True, "text": True, "env": env}
             )
+            
+            _LOGGER.info("BlowControl CLI return code: %s", result.returncode)
+            _LOGGER.info("BlowControl CLI stdout: %s", result.stdout)
+            _LOGGER.info("BlowControl CLI stderr: %s", result.stderr)
             
             if result.returncode == 0:
                 try:
                     state_data = json.loads(result.stdout)
+                    _LOGGER.info("Parsed state data: %s", state_data)
                     return self._parse_blowcontrol_state(state_data)
-                except json.JSONDecodeError:
-                    _LOGGER.warning("Failed to parse BlowControl state JSON")
+                except json.JSONDecodeError as e:
+                    _LOGGER.warning("Failed to parse BlowControl state JSON: %s", e)
+                    _LOGGER.info("Falling back to mock data")
                     return await self._fetch_mock_data()
             else:
                 _LOGGER.warning("BlowControl CLI failed: %s", result.stderr)
+                _LOGGER.info("Falling back to mock data")
                 return await self._fetch_mock_data()
                 
         except (subprocess.SubprocessError, FileNotFoundError) as err:
             _LOGGER.warning("BlowControl CLI not available: %s", err)
+            _LOGGER.info("Falling back to mock data")
             return await self._fetch_mock_data()
         except Exception as err:
             _LOGGER.error("Error updating BlowControl data: %s", err)
