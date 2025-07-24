@@ -81,8 +81,9 @@ class BlowControlPowerSensor(BinarySensorEntity):
         self._state = is_on
         self.async_write_ha_state()
 
-    def update_from_coordinator(self, data: dict[str, Any]) -> None:
+    def update_from_coordinator(self) -> None:
         """Update the sensor state from coordinator data."""
+        data = self.coordinator.data
         if data and "fan" in data:
             fan_data = data["fan"]
             self._state = fan_data.get("power") == "ON"
@@ -122,8 +123,9 @@ class BlowControlConnectionSensor(BinarySensorEntity):
         self._state = is_connected
         self.async_write_ha_state()
 
-    def update_from_coordinator(self, data: dict[str, Any]) -> None:
+    def update_from_coordinator(self) -> None:
         """Update the sensor state from coordinator data."""
+        data = self.coordinator.data
         if data and "connection" in data:
             connection_data = data["connection"]
             self._state = connection_data.get("connected", True)

@@ -96,8 +96,9 @@ class BlowControlTemperatureSensor(SensorEntity):
         self._state = temperature
         self.async_write_ha_state()
 
-    def update_from_coordinator(self, data: dict[str, Any]) -> None:
+    def update_from_coordinator(self) -> None:
         """Update the sensor state from coordinator data."""
+        data = self.coordinator.data
         if data and "environment" in data:
             env_data = data["environment"]
             self._state = env_data.get("temperature")
@@ -147,8 +148,8 @@ class BlowControlHumiditySensor(SensorEntity):
         self._state = humidity
         self.async_write_ha_state()
 
-    def update_from_coordinator(self, data: dict[str, Any]) -> None:
-        """Update the sensor state from coordinator data."""
+    def update_from_coordinator(self) -> None:
+        data = self.coordinator.data
         if data and "environment" in data:
             env_data = data["environment"]
             self._state = env_data.get("humidity")
@@ -198,8 +199,8 @@ class BlowControlAirQualitySensor(SensorEntity):
         self._state = air_quality
         self.async_write_ha_state()
 
-    def update_from_coordinator(self, data: dict[str, Any]) -> None:
-        """Update the sensor state from coordinator data."""
+    def update_from_coordinator(self) -> None:
+        data = self.coordinator.data
         if data and "environment" in data:
             env_data = data["environment"]
             self._state = env_data.get("air_quality")
@@ -244,8 +245,8 @@ class BlowControlFanSpeedSensor(SensorEntity):
         self._state = speed
         self.async_write_ha_state()
 
-    def update_from_coordinator(self, data: dict[str, Any]) -> None:
-        """Update the sensor state from coordinator data."""
+    def update_from_coordinator(self) -> None:
+        data = self.coordinator.data
         if data and "fan" in data:
             fan_data = data["fan"]
             self._state = fan_data.get("rpm")

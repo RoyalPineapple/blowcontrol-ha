@@ -74,7 +74,7 @@ class BlowControlFan(FanEntity):
         
         # Update state from coordinator data
         if self.coordinator.data:
-            self.update_from_coordinator(self.coordinator.data)
+            self.update_from_coordinator()
 
     @property
     def name(self) -> str:
@@ -181,8 +181,9 @@ class BlowControlFan(FanEntity):
         """Return True if entity is available."""
         return self.coordinator.last_update_success
 
-    def update_from_coordinator(self, data: dict[str, Any]) -> None:
+    def update_from_coordinator(self) -> None:
         """Update the fan state from coordinator data."""
+        data = self.coordinator.data
         if data and "fan" in data:
             fan_data = data["fan"]
             self._state = STATE_ON if fan_data.get("power") == "ON" else STATE_OFF
