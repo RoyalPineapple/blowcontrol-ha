@@ -15,6 +15,7 @@ from homeassistant.util.percentage import (
     percentage_to_ranged_value,
     ranged_value_to_percentage,
 )
+from homeassistant.helpers.entity import async_generate_entity_id
 
 from .const import (
     DEFAULT_NAME,
@@ -48,7 +49,7 @@ async def async_setup_entry(
     # Get or create coordinator
     coordinator = hass.data[DOMAIN].get("coordinator")
     if coordinator is None:
-        coordinator = BlowControlCoordinator(hass, config)
+        coordinator = BlowControlCoordinator(hass, config, config_entry)
         hass.data[DOMAIN]["coordinator"] = coordinator
     
     # Create fan entity
@@ -58,6 +59,16 @@ async def async_setup_entry(
     coordinator.async_add_listener(fan.update_from_coordinator)
     
     async_add_entities([fan])
+
+    # Register entity service for request_state
+    platform = hass.data[DOMAIN].get("fan_platform")
+    if platform is None:
+        hass.data[DOMAIN]["fan_platform"] = platform = async_add_entities
+    fan.async_register_entity_service(
+        "request_state",
+        {},
+        "async_request_state",
+    )
 
 class BlowControlFan(FanEntity):
     """Representation of a BlowControl fan."""
@@ -213,6 +224,10 @@ class BlowControlFan(FanEntity):
             self._speed = speed
             self._percentage = ranged_value_to_percentage(SPEED_RANGE, speed)
 
+    async def async_request_state(self):
+        _LOGGER.info(f"Fan entity service: request_state for {self._name}")
+        await self.coordinator.async_request_refresh()
+
     @property
     def unique_id(self) -> str:
         """Return unique ID for this device."""
@@ -229,7 +244,7 @@ class BlowControlFan(FanEntity):
         return self.coordinator.last_update_success
 
     def update_from_coordinator(self) -> None:
-        """Update the fan state from coordinator data."""
+        _LOGGER.debug("[FAN ENTITY] update_from_coordinator called for %s", self._name)
         data = self.coordinator.data
         if data and "fan" in data:
             fan_data = data["fan"]
@@ -239,3 +254,4 @@ class BlowControlFan(FanEntity):
             self._direction = fan_data.get("direction", "forward")
             self._percentage = ranged_value_to_percentage(SPEED_RANGE, self._speed)
             self.async_write_ha_state()
+            _LOGGER.debug("[FAN ENTITY] State updated: %s", fan_data)
