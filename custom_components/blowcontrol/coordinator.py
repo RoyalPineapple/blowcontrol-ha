@@ -179,9 +179,12 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 _LOGGER.error("Failed to set fan power: %s", result.stderr)
                 raise Exception(f"BlowControl CLI failed: {result.stderr}")
                 
+        except FileNotFoundError:
+            _LOGGER.warning("BlowControl CLI not found. Please install it to enable fan control.")
+            return
         except Exception as err:
             _LOGGER.error("Error setting fan power: %s", err)
-            raise
+            return
 
     async def async_set_fan_speed(self, speed: int) -> None:
         """Set fan speed via BlowControl CLI."""
@@ -207,9 +210,12 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 _LOGGER.error("Failed to set fan speed: %s", result.stderr)
                 raise Exception(f"BlowControl CLI failed: {result.stderr}")
                 
+        except FileNotFoundError:
+            _LOGGER.warning("BlowControl CLI not found. Please install it to enable fan control.")
+            return
         except Exception as err:
             _LOGGER.error("Error setting fan speed: %s", err)
-            raise
+            return
 
     async def async_set_fan_oscillation(self, oscillating: bool) -> None:
         """Set fan oscillation via BlowControl CLI."""
@@ -236,9 +242,12 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 _LOGGER.error("Failed to set fan oscillation: %s", result.stderr)
                 raise Exception(f"BlowControl CLI failed: {result.stderr}")
                 
+        except FileNotFoundError:
+            _LOGGER.warning("BlowControl CLI not found. Please install it to enable fan control.")
+            return
         except Exception as err:
             _LOGGER.error("Error setting fan oscillation: %s", err)
-            raise
+            return
 
     async def async_set_fan_direction(self, direction: str) -> None:
         """Set fan direction via BlowControl CLI."""
@@ -265,9 +274,12 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 _LOGGER.error("Failed to set fan direction: %s", result.stderr)
                 raise Exception(f"BlowControl CLI failed: {result.stderr}")
                 
+        except FileNotFoundError:
+            _LOGGER.warning("BlowControl CLI not found. Please install it to enable fan control.")
+            return
         except Exception as err:
             _LOGGER.error("Error setting fan direction: %s", err)
-            raise
+            return
 
     async def async_close(self) -> None:
         """Close the coordinator."""
