@@ -27,10 +27,25 @@ class BlowControlConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             try:
-                # Validate the connection here
-                # For now, we'll just accept the input
                 host = user_input[CONF_HOST]
                 name = user_input.get(CONF_NAME, DEFAULT_NAME)
+                
+                # Validate host format
+                if not self._is_valid_host(host):
+                    errors["base"] = "invalid_host"
+                    return self.async_show_form(
+                        step_id="user",
+                        data_schema=vol.Schema(
+                            {
+                                vol.Required(CONF_HOST, default=host): str,
+                                vol.Optional(CONF_NAME, default=name): str,
+                            }
+                        ),
+                        errors=errors,
+                    )
+                
+                # Test connection (optional - can be removed if not needed)
+                # await self._test_connection(host)
                 
                 # Create unique ID based on host
                 await self.async_set_unique_id(host)
@@ -56,4 +71,13 @@ class BlowControlConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }
             ),
             errors=errors,
-        ) 
+        )
+
+    def _is_valid_host(self, host: str) -> bool:
+        """Validate host format."""
+        import re
+        # Basic IP address validation
+        ip_pattern = r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+        hostname_pattern = r'^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$'
+        
+        return bool(re.match(ip_pattern, host) or re.match(hostname_pattern, host)) 

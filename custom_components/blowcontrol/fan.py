@@ -11,20 +11,15 @@ from homeassistant.components.fan import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.util.percentage import (
-    int_states_in_range,
     percentage_to_ranged_value,
     ranged_value_to_percentage,
 )
 
 from .const import (
-    CONF_HOST,
-    CONF_NAME,
     DEFAULT_NAME,
     DOMAIN,
     FAN_SPEED_NAMES,
-    FAN_SPEED_PERCENTAGES,
     FAN_SPEED_OFF,
     FAN_SPEED_LOW,
     FAN_SPEED_MEDIUM,
@@ -57,7 +52,13 @@ async def async_setup_entry(
         coordinator = BlowControlCoordinator(hass, host)
         hass.data[DOMAIN]["coordinator"] = coordinator
     
-    async_add_entities([BlowControlFan(coordinator, name, config_entry.entry_id)])
+    # Create fan entity
+    fan = BlowControlFan(coordinator, name, config_entry.entry_id)
+    
+    # Add coordinator listener
+    coordinator.async_add_listener(fan.update_from_coordinator)
+    
+    async_add_entities([fan])
 
 class BlowControlFan(FanEntity):
     """Representation of a BlowControl fan."""
@@ -71,6 +72,10 @@ class BlowControlFan(FanEntity):
         self._speed = FAN_SPEED_OFF
         self._oscillating = False
         self._percentage = 0
+        
+        # Update state from coordinator data
+        if self.coordinator.data:
+            self.update_from_coordinator(self.coordinator.data)
 
     @property
     def name(self) -> str:
@@ -167,6 +172,16 @@ class BlowControlFan(FanEntity):
         """Return unique ID for this device."""
         return f"{self._entry_id}_fan"
 
+    @property
+    def should_poll(self) -> bool:
+        """Return the polling state."""
+        return False
+
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        return self.coordinator.last_update_success
+
     def update_from_coordinator(self, data: dict[str, Any]) -> None:
         """Update the fan state from coordinator data."""
         if data and "fan" in data:
@@ -175,3 +190,4 @@ class BlowControlFan(FanEntity):
             self._speed = fan_data.get("speed", FAN_SPEED_OFF)
             self._oscillating = fan_data.get("oscillating", False)
             self._percentage = ranged_value_to_percentage(SPEED_RANGE, self._speed)
+            self.async_write_ha_state()
