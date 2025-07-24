@@ -104,7 +104,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 return await self._fetch_mock_data()
                 
         except (subprocess.SubprocessError, FileNotFoundError) as err:
-            _LOGGER.warning("BlowControl CLI not available: %s", err)
+            _LOGGER.info("BlowControl CLI not available: %s", err)
             _LOGGER.info("Falling back to mock data")
             return await self._fetch_mock_data()
         except Exception as err:
@@ -208,7 +208,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 raise Exception(f"BlowControl CLI failed: {result.stderr}")
                 
         except FileNotFoundError:
-            _LOGGER.warning("BlowControl CLI not found. Please install it to enable fan control.")
+            _LOGGER.info("BlowControl CLI not found. Using mock mode for testing. Install BlowControl CLI for full device control.")
             return
         except Exception as err:
             _LOGGER.error("Error setting fan power: %s", err)
@@ -242,7 +242,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 raise Exception(f"BlowControl CLI failed: {result.stderr}")
                 
         except FileNotFoundError:
-            _LOGGER.warning("BlowControl CLI not found. Please install it to enable fan control.")
+            _LOGGER.info("BlowControl CLI not found. Using mock mode for testing. Install BlowControl CLI for full device control.")
             return
         except Exception as err:
             _LOGGER.error("Error setting fan speed: %s", err)
@@ -276,7 +276,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 raise Exception(f"BlowControl CLI failed: {result.stderr}")
                 
         except FileNotFoundError:
-            _LOGGER.warning("BlowControl CLI not found. Please install it to enable fan control.")
+            _LOGGER.info("BlowControl CLI not found. Using mock mode for testing. Install BlowControl CLI for full device control.")
             return
         except Exception as err:
             _LOGGER.error("Error setting fan oscillation: %s", err)
@@ -310,7 +310,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 raise Exception(f"BlowControl CLI failed: {result.stderr}")
                 
         except FileNotFoundError:
-            _LOGGER.warning("BlowControl CLI not found. Please install it to enable fan control.")
+            _LOGGER.info("BlowControl CLI not found. Using mock mode for testing. Install BlowControl CLI for full device control.")
             return
         except Exception as err:
             _LOGGER.error("Error setting fan direction: %s", err)
