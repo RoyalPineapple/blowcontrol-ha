@@ -125,10 +125,9 @@ class BlowControlCoordinator(DataUpdateCoordinator):
         # Map BlowControl speed (0-10) back to our speed (0-4)
         blowcontrol_speed = int(fan_state.get("fnsp", ["0"])[1])
         mapped_speed = 0
-        for our_speed, bc_speed in BLOWCONTROL_SPEED_MAPPING.items():
-            if bc_speed == blowcontrol_speed:
-                mapped_speed = our_speed
-                break
+        # Create reverse mapping from BlowControl speed to our speed
+        reverse_mapping = {bc_speed: our_speed for our_speed, bc_speed in BLOWCONTROL_SPEED_MAPPING.items()}
+        mapped_speed = reverse_mapping.get(blowcontrol_speed, 0)
         
         # Parse oscillation state
         oscillation_on = fan_state.get("oson", ["OFF"])[1] == "ON"
