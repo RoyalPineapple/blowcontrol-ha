@@ -12,8 +12,6 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     PERCENTAGE,
-    TEMP_CELSIUS,
-    UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -61,7 +59,7 @@ class BlowControlTemperatureSensor(SensorEntity):
         self._name = f"{name} Temperature"
         self._entry_id = entry_id
         self._state = None
-        self._unit_of_measurement = UnitOfTemperature.CELSIUS
+        self._unit_of_measurement = "°C"  # Use string for Celsius
 
     @property
     def name(self) -> str:
