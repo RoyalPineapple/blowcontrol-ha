@@ -15,7 +15,7 @@ DEFAULT_SCAN_INTERVAL = 30
 STATE_ON = "on"
 STATE_OFF = "off"
 
-# Fan speeds
+# Fan speeds (mapped to BlowControl's 0-10 range)
 FAN_SPEED_OFF = 0
 FAN_SPEED_LOW = 1
 FAN_SPEED_MEDIUM = 2
@@ -31,11 +31,21 @@ FAN_SPEED_NAMES = {
     FAN_SPEED_MAX: "Max"
 }
 
-# Fan speed percentages
+# Fan speed percentages (mapped to BlowControl's 0-10 range)
 FAN_SPEED_PERCENTAGES = {
     FAN_SPEED_OFF: 0,
     FAN_SPEED_LOW: 25,
     FAN_SPEED_MEDIUM: 50,
     FAN_SPEED_HIGH: 75,
     FAN_SPEED_MAX: 100
+}
+
+# BlowControl API mapping
+# Our 0-4 range maps to BlowControl's 0-10 range
+BLOWCONTROL_SPEED_MAPPING = {
+    0: 0,    # Off
+    1: 2,    # Low
+    2: 5,    # Medium
+    3: 8,    # High
+    4: 10,   # Max
 }

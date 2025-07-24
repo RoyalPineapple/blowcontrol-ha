@@ -13,7 +13,7 @@ from functools import partial
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DEFAULT_SCAN_INTERVAL
+from .const import DEFAULT_SCAN_INTERVAL, BLOWCONTROL_SPEED_MAPPING
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
             }
             _LOGGER.info("Environment variables: %s", {k: "***" if k == "MQTT_PASSWORD" else v for k, v in env.items()})
             
-            # Get device state via BlowControl CLI
+            # Get device state via BlowControl CLI: blowcontrol state --json
             command = ["blowcontrol", "state", "--json"]
             _LOGGER.info("Running command: %s", " ".join(command))
             
@@ -113,24 +113,51 @@ class BlowControlCoordinator(DataUpdateCoordinator):
 
     def _parse_blowcontrol_state(self, state_data: dict[str, Any]) -> dict[str, Any]:
         """Parse BlowControl CLI state output."""
-        # Parse the actual BlowControl CLI output format
-        # This will need to be adjusted based on the actual CLI output
+        # Parse the actual BlowControl CLI state structure
+        # The state command returns: {"state": {...}, "environmental": {...}}
+        
+        device_state = state_data.get("state", {})
+        environmental = state_data.get("environmental", {})
+        
+        # Extract fan state from device state
+        fan_state = device_state.get("product-state", {})
+        
+        # Map BlowControl speed (0-10) back to our speed (0-4)
+        blowcontrol_speed = int(fan_state.get("fnsp", ["0"])[1])
+        mapped_speed = 0
+        for our_speed, bc_speed in BLOWCONTROL_SPEED_MAPPING.items():
+            if bc_speed == blowcontrol_speed:
+                mapped_speed = our_speed
+                break
+        
+        # Parse oscillation state
+        oscillation_on = fan_state.get("oson", ["OFF"])[1] == "ON"
+        oscillation_angles = {
+            "lower": int(fan_state.get("osal", ["0000"])[1]),
+            "upper": int(fan_state.get("osau", ["0000"])[1])
+        }
+        
+        # Determine oscillation width from angles
+        oscillation_width = 0
+        if oscillation_on and oscillation_angles["upper"] > oscillation_angles["lower"]:
+            oscillation_width = oscillation_angles["upper"] - oscillation_angles["lower"]
+        
         return {
             "fan": {
-                "power": state_data.get("power", "OFF"),
-                "speed": state_data.get("speed", 0),
-                "oscillating": state_data.get("oscillating", False),
-                "direction": state_data.get("direction", "forward"),
-                "rpm": state_data.get("rpm", 0),
+                "power": fan_state.get("fpwr", ["OFF"])[1],
+                "speed": mapped_speed,
+                "oscillating": oscillation_width > 0,
+                "direction": "forward",  # Default, could be enhanced with actual direction
+                "rpm": mapped_speed * 300,  # Estimate RPM based on speed
             },
             "environment": {
-                "temperature": state_data.get("temperature", 22.5),
-                "humidity": state_data.get("humidity", 45.2),
-                "air_quality": state_data.get("air_quality", 12.3),
+                "temperature": environmental.get("tact", 22.5),
+                "humidity": environmental.get("hact", 45.2),
+                "air_quality": environmental.get("pm25", 12.3),
             },
             "connection": {
-                "connected": state_data.get("connected", True),
-                "last_seen": state_data.get("last_seen", "2024-01-01T12:00:00Z"),
+                "connected": True,  # If we got state, we're connected
+                "last_seen": "2024-01-01T12:00:00Z",  # Could be enhanced with actual timestamp
             }
         }
 
@@ -170,6 +197,7 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 "ROOT_TOPIC": self.root_topic,
             }
             
+            # Use actual BlowControl CLI command: blowcontrol power on/off
             command = ["blowcontrol", "power", "on" if power else "off"]
             result = await self.hass.async_add_executor_job(
                 partial(subprocess.run, command, capture_output=True, text=True, env=env)
@@ -201,7 +229,10 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 "ROOT_TOPIC": self.root_topic,
             }
             
-            command = ["blowcontrol", "speed", str(speed)]
+            # Use actual BlowControl CLI command: blowcontrol speed <0-10>
+            # Note: BlowControl uses 0-10 range, we map our 0-4 to 0-10
+            mapped_speed = BLOWCONTROL_SPEED_MAPPING.get(speed, 0)
+            command = ["blowcontrol", "speed", str(mapped_speed)]
             result = await self.hass.async_add_executor_job(
                 partial(subprocess.run, command, capture_output=True, text=True, env=env)
             )
@@ -232,8 +263,10 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 "ROOT_TOPIC": self.root_topic,
             }
             
-            # Note: This would need to be adjusted based on actual BlowControl CLI commands
-            command = ["blowcontrol", "oscillation", "on" if oscillating else "off"]
+            # Use actual BlowControl CLI command: blowcontrol width <width>
+            # 0 = no oscillation, 90 = medium, 180 = wide
+            width = "180" if oscillating else "0"
+            command = ["blowcontrol", "width", width]
             result = await self.hass.async_add_executor_job(
                 partial(subprocess.run, command, capture_output=True, text=True, env=env)
             )
@@ -264,8 +297,10 @@ class BlowControlCoordinator(DataUpdateCoordinator):
                 "ROOT_TOPIC": self.root_topic,
             }
             
-            # Note: This would need to be adjusted based on actual BlowControl CLI commands
-            command = ["blowcontrol", "direction", direction]
+            # Use actual BlowControl CLI command: blowcontrol direction <degrees>
+            # Map "forward" to 180°, "reverse" to 0°
+            degrees = "180" if direction == "forward" else "0"
+            command = ["blowcontrol", "direction", degrees]
             result = await self.hass.async_add_executor_job(
                 partial(subprocess.run, command, capture_output=True, text=True, env=env)
             )
