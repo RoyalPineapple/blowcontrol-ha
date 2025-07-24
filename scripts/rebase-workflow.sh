@@ -10,6 +10,7 @@ echo "=================================="
 
 # Check if we're on a feature branch
 current_branch=$(git branch --show-current)
+
 if [[ "$current_branch" == "main" ]]; then
     echo "❌ Error: You're on the main branch. Please switch to a feature branch first."
     exit 1
