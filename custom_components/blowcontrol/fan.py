@@ -71,6 +71,7 @@ class BlowControlFan(FanEntity):
         self._speed = FAN_SPEED_OFF
         self._oscillating = False
         self._percentage = 0
+        self._direction = "forward"
         
         # Update state from coordinator data
         if self.coordinator.data:
@@ -102,6 +103,11 @@ class BlowControlFan(FanEntity):
         return self._oscillating
 
     @property
+    def current_direction(self) -> str | None:
+        """Return the current direction of the fan."""
+        return self._direction
+
+    @property
     def supported_features(self) -> FanEntityFeature:
         """Flag supported features."""
         return (
@@ -117,21 +123,31 @@ class BlowControlFan(FanEntity):
         **kwargs: Any,
     ) -> None:
         """Turn on the fan."""
-        if percentage is not None:
-            await self.async_set_percentage(percentage)
-        else:
-            # Turn on at last known speed or low speed
-            speed = self._speed if self._speed > FAN_SPEED_OFF else FAN_SPEED_LOW
-            await self._async_set_speed(speed)
-        
-        await self.coordinator.async_set_fan_power(True)
-        self._state = STATE_ON
-        self.async_write_ha_state()
+        try:
+            if percentage is not None:
+                await self.async_set_percentage(percentage)
+            else:
+                # Turn on at last known speed or low speed
+                speed = self._speed if self._speed > FAN_SPEED_OFF else FAN_SPEED_LOW
+                await self._async_set_speed(speed)
+            
+            await self.coordinator.async_set_fan_power(True)
+            self._state = STATE_ON
+            self.async_write_ha_state()
+        except Exception as e:
+            _LOGGER.error("Failed to turn on fan: %s", e)
+            # Still update state even if CLI fails
+            self._state = STATE_ON
+            self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn off the fan."""
-        await self.coordinator.async_set_fan_power(False)
-        await self._async_set_speed(FAN_SPEED_OFF)
+        try:
+            await self.coordinator.async_set_fan_power(False)
+            await self._async_set_speed(FAN_SPEED_OFF)
+        except Exception as e:
+            _LOGGER.error("Failed to turn off fan: %s", e)
+        
         self._state = STATE_OFF
         self._percentage = 0
         self.async_write_ha_state()
@@ -142,29 +158,51 @@ class BlowControlFan(FanEntity):
             await self.async_turn_off()
             return
 
-        speed = percentage_to_ranged_value(SPEED_RANGE, percentage)
-        await self._async_set_speed(speed)
-        self._percentage = percentage
-        self._state = STATE_ON
-        self.async_write_ha_state()
+        try:
+            speed = percentage_to_ranged_value(SPEED_RANGE, percentage)
+            await self._async_set_speed(speed)
+            self._percentage = percentage
+            self._state = STATE_ON
+            self.async_write_ha_state()
+        except Exception as e:
+            _LOGGER.error("Failed to set fan percentage: %s", e)
+            # Still update state even if CLI fails
+            self._percentage = percentage
+            self._state = STATE_ON
+            self.async_write_ha_state()
 
     async def async_set_oscillating(self, oscillating: bool) -> None:
         """Set oscillation."""
-        await self.coordinator.async_set_fan_oscillation(oscillating)
+        try:
+            await self.coordinator.async_set_fan_oscillation(oscillating)
+        except Exception as e:
+            _LOGGER.error("Failed to set fan oscillation: %s", e)
+        
         self._oscillating = oscillating
         self.async_write_ha_state()
 
     async def async_set_direction(self, direction: str) -> None:
         """Set the direction of the fan."""
-        await self.coordinator.async_set_fan_direction(direction)
+        try:
+            await self.coordinator.async_set_fan_direction(direction)
+        except Exception as e:
+            _LOGGER.error("Failed to set fan direction: %s", e)
+        
+        self._direction = direction
         self.async_write_ha_state()
 
     async def _async_set_speed(self, speed: int) -> None:
         """Set the speed of the fan."""
-        await self.coordinator.async_set_fan_speed(speed)
-        self._speed = speed
-        self._percentage = ranged_value_to_percentage(SPEED_RANGE, speed)
-        _LOGGER.info("Setting fan speed to %s (%s)", speed, FAN_SPEED_NAMES.get(speed, "Unknown"))
+        try:
+            await self.coordinator.async_set_fan_speed(speed)
+            self._speed = speed
+            self._percentage = ranged_value_to_percentage(SPEED_RANGE, speed)
+            _LOGGER.info("Setting fan speed to %s (%s)", speed, FAN_SPEED_NAMES.get(speed, "Unknown"))
+        except Exception as e:
+            _LOGGER.error("Failed to set fan speed: %s", e)
+            # Still update state even if CLI fails
+            self._speed = speed
+            self._percentage = ranged_value_to_percentage(SPEED_RANGE, speed)
 
     @property
     def unique_id(self) -> str:
@@ -189,5 +227,6 @@ class BlowControlFan(FanEntity):
             self._state = STATE_ON if fan_data.get("power") == "ON" else STATE_OFF
             self._speed = fan_data.get("speed", FAN_SPEED_OFF)
             self._oscillating = fan_data.get("oscillating", False)
+            self._direction = fan_data.get("direction", "forward")
             self._percentage = ranged_value_to_percentage(SPEED_RANGE, self._speed)
             self.async_write_ha_state()

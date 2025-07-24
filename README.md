@@ -59,6 +59,7 @@ A comprehensive Home Assistant integration for controlling Dyson fans through th
 - **Home Assistant**: Version 2023.8.0 or higher
 - **Python**: 3.10 or higher (included with Home Assistant)
 - **Network**: Stable network connection between Home Assistant and BlowControl device
+- **BlowControl CLI**: The `blowcontrol` command-line tool must be installed and available in the system PATH
 
 ### Optional Requirements
 - **HACS**: For easy installation and updates
@@ -89,13 +90,21 @@ A comprehensive Home Assistant integration for controlling Dyson fans through th
 
 ### Method 2: Manual Installation
 
-1. **Clone Repository**:
+1. **Install BlowControl CLI** (required):
+   ```bash
+   # Install the blowcontrol CLI tool
+   # This is required for the integration to work
+   # Follow the official BlowControl installation guide
+   # https://github.com/yourusername/blowcontrol
+   ```
+
+2. **Clone Repository**:
    ```bash
    git clone https://github.com/RoyalPineapple/blowcontrol-ha.git
    cd blowcontrol-ha
    ```
 
-2. **Copy Integration**:
+3. **Copy Integration**:
    ```bash
    # Copy to your Home Assistant config directory
    cp -r custom_components/blowcontrol /path/to/homeassistant/config/custom_components/
@@ -126,6 +135,18 @@ cp -r custom_components/blowcontrol /PATH_TO_YOUR_CONFIG/custom_components/
 
 ## ⚙️ Configuration
 
+### Prerequisites
+
+Before configuring the integration, ensure you have:
+
+1. **BlowControl CLI Installed**: The `blowcontrol` command must be available in your system PATH
+2. **Device Credentials**: You'll need the following information:
+   - Device IP address
+   - MQTT password
+   - Device serial number
+   - MQTT port (usually 1883)
+   - Root topic (usually 438M)
+
 ### Initial Setup
 
 1. **Access Home Assistant**:
@@ -138,9 +159,12 @@ cp -r custom_components/blowcontrol /PATH_TO_YOUR_CONFIG/custom_components/
    - Click on the integration
 
 3. **Configure Device**:
-   - **Host/IP Address**: Enter your BlowControl device's IP address
-   - **Device Name**: Optional custom name (defaults to "BlowControl Fan")
-   - Click **Submit**
+   - **Device IP**: IP address of your BlowControl device
+   - **MQTT Password**: Password for MQTT communication
+   - **Serial Number**: Device serial number
+   - **MQTT Port**: MQTT port (default: 1883)
+   - **Root Topic**: MQTT root topic (default: 438M)
+   - **Name**: Friendly name for the integration
 
 ### Configuration Options
 
@@ -472,6 +496,23 @@ script:
    ```
 3. **Verify BlowControl service** is running on the device
 4. **Check firewall settings** on both Home Assistant and BlowControl device
+
+#### BlowControl CLI Not Found
+**Problem**: Error "No such file or directory: 'blowcontrol'" in logs.
+
+**Solutions**:
+1. **Install BlowControl CLI**:
+   ```bash
+   # Follow the official BlowControl installation guide
+   # https://github.com/yourusername/blowcontrol
+   ```
+2. **Verify CLI installation**:
+   ```bash
+   blowcontrol --help
+   ```
+3. **Check PATH**: Ensure `blowcontrol` is in your system PATH
+4. **Restart Home Assistant** after installing the CLI
+5. **Check permissions**: Ensure the CLI is executable
 
 #### Entities Not Updating
 **Problem**: Sensor values are not updating or showing stale data.
