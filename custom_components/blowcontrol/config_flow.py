@@ -71,7 +71,7 @@ class BlowControlConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             vol.Required("mqtt_password"): str,
                             vol.Required("serial_number"): str,
                             vol.Optional("mqtt_port", default=1883): int,
-                            vol.Optional("root_topic", default="438M"): str,
+                            vol.Optional("root_topic"): str,
                             vol.Optional("name", default=DEFAULT_NAME): str,
                         }
                     ),
@@ -87,7 +87,7 @@ class BlowControlConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required("mqtt_password"): str,
                     vol.Required("serial_number"): str,
                     vol.Optional("mqtt_port", default=1883): int,
-                    vol.Optional("root_topic", default="438M"): str,
+                    vol.Optional("root_topic"): str,
                     vol.Optional("name", default=DEFAULT_NAME): str,
                 }
             ),
